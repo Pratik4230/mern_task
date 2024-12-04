@@ -98,7 +98,7 @@ const getStatistics = async (req, res) => {
 
     console.log("transactions : ", transactions);
 
-    if (transactions.length === 0) {
+    if (!transactions || transactions.length === 0) {
       return res.status(200).json({
         totalSaleAmount: 0,
         totalSoldItems: 0,
@@ -110,6 +110,7 @@ const getStatistics = async (req, res) => {
       transactions[0];
 
     res.status(200).json({
+      message: `Statistics of ${month} is fetched successfully`,
       totalSaleAmount,
       totalSoldItems,
       totalNotSoldItems,
@@ -122,4 +123,154 @@ const getStatistics = async (req, res) => {
   }
 };
 
-export { getAllTransactions, getStatistics };
+const getBarChart = async (req, res) => {
+  try {
+    const { month } = req.query;
+
+    if (!month) {
+      return res.status(400).json({ message: "Month is required" });
+    }
+
+    const result = await Product.aggregate([
+      {
+        $addFields: {
+          monthName: {
+            $arrayElemAt: [
+              [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+              ],
+              { $subtract: [{ $month: "$dateOfSale" }, 1] },
+            ],
+          },
+        },
+      },
+
+      {
+        $match: {
+          monthName: month,
+        },
+      },
+
+      {
+        $bucket: {
+          groupBy: "$price",
+          boundaries: [
+            0,
+            100,
+            200,
+            300,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900,
+            Infinity,
+          ],
+          default: "Other",
+          output: {
+            count: { $sum: 1 },
+          },
+        },
+      },
+    ]);
+
+    if (!result || result.length === 0) {
+      return res
+        .status(200)
+        .json({ message: `No data found for the ${month} ` });
+    }
+
+    console.log("result : ", result);
+
+    return res.status(200).json({ message: `bar chart of ${month} `, result });
+  } catch (error) {
+    console.log("getBarChart error : ", error.message);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+const getPieChart = async (req, res) => {
+  try {
+    const { month } = req.query;
+
+    if (!month) {
+      return res.status(400).json({ message: "Month is required" });
+    }
+
+    const result = await Product.aggregate([
+      {
+        $addFields: {
+          monthName: {
+            $arrayElemAt: [
+              [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+              ],
+              { $subtract: [{ $month: "$dateOfSale" }, 1] },
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          monthName: month,
+        },
+      },
+
+      {
+        $group: {
+          _id: "$category",
+          itemCount: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          itemCount: "$itemCount",
+        },
+      },
+    ]);
+
+    if (!result || result.length === 0) {
+      return res
+        .status(204)
+        .json({ message: `No data found for the ${month} `, result: [] });
+    }
+
+    console.log("result : ", result);
+
+    return res.status(200).json({ message: `pie chart of ${month} `, result });
+  } catch (error) {
+    console.log("getBarChart error : ", error.message);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+export { getAllTransactions, getStatistics, getBarChart, getPieChart };
