@@ -1,0 +1,5 @@
+MONGODB_URL=mongodb+srv://[Name:Password]@cluster0.cdztx.mongodb.net/merntask
+PORT=8090
+PRODUCTS_URL=https://s3.amazonaws.com/roxiler.com/product_transaction.json
+BASE_URL=http://localhost:8090
+ALLOWED_ORIGIN=http://localhost:5173
