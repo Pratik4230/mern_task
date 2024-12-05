@@ -47,8 +47,6 @@ const getStatistics = async (req, res) => {
       return res.status(400).json({ message: "Month is required" });
     }
 
-    console.log("month : ", month);
-
     const months = [
       "January",
       "February",
@@ -95,8 +93,6 @@ const getStatistics = async (req, res) => {
         },
       },
     ]);
-
-    console.log("transactions : ", transactions);
 
     if (!transactions || transactions.length === 0) {
       return res.status(200).json({
@@ -192,8 +188,6 @@ const getBarChart = async (req, res) => {
         .json({ message: `No data found for the ${month} ` });
     }
 
-    console.log("result : ", result);
-
     return res.status(200).json({ message: `bar chart of ${month} `, result });
   } catch (error) {
     console.log("getBarChart error : ", error.message);
@@ -261,8 +255,6 @@ const getPieChart = async (req, res) => {
         .status(204)
         .json({ message: `No data found for the ${month} `, result: [] });
     }
-
-    console.log("result : ", result);
 
     return res.status(200).json({ message: `pie chart of ${month} `, result });
   } catch (error) {

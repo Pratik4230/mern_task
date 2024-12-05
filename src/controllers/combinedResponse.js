@@ -28,8 +28,6 @@ const combinedResponse = async (req, res) => {
       pieChart: PieChartResponse.data,
     };
 
-    console.log("combinedData : ", combinedData);
-
     res.status(200).json(combinedData);
   } catch (error) {
     console.log("combinedResponse error : ", error.message);
